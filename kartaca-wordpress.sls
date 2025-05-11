@@ -1,5 +1,6 @@
 {% set user = pillar.get('kartaca_user', {}) %}
 
+# Ortak kullanıcı ve sistem ayarları
 kartaca_group:
   group.present:
     - gid: {{ user.gid }}
@@ -28,16 +29,6 @@ set_hostname:
   cmd.run:
     - name: hostnamectl set-hostname kartaca1.local
 
-required_packages:
-  pkg.installed:
-    - pkgs:
-      - htop
-      - tcptraceroute
-      - inetutils-ping
-      - dnsutils
-      - sysstat
-      - mtr
-
 ip_forwarding:
   sysctl.present:
     - name: net.ipv4.ip_forward
@@ -54,7 +45,18 @@ hosts_entry:
         127.0.1.1   kartaca1.local
     - append_if_not_found: True
 
-# Docker Kurulumu
+{% if grains['os'] == 'Ubuntu' %}
+
+required_packages_ubuntu:
+  pkg.installed:
+    - pkgs:
+      - htop
+      - tcptraceroute
+      - inetutils-ping
+      - dnsutils
+      - sysstat
+      - mtr
+
 docker_pkg_repo:
   pkgrepo.managed:
     - name: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
@@ -74,37 +76,108 @@ docker_service:
     - name: docker
     - enable: True
 
-# docker-compose.yml kurulumu
 wordpress_compose_file:
   file.managed:
     - name: /opt/wordpress/docker-compose.yml
     - source: salt://files/docker-compose.yml
     - makedirs: True
 
-# HAProxy konfigürasyon dosyası
-haproxy_compose_config:
+haproxy_cfg:
   file.managed:
     - name: /opt/wordpress/haproxy.cfg
     - source: salt://files/haproxy.cfg
     - require:
       - file: wordpress_compose_file
 
-# SSL sertifikası
-haproxy_compose_cert:
+haproxy_cert:
   file.managed:
     - name: /opt/wordpress/ssl/selfsigned.pem
     - source: salt://files/ssl/selfsigned.pem
     - makedirs: True
-    - require:
-      - file: wordpress_compose_file
 
-# WordPress + HAProxy container'larını çalıştır
 wordpress_stack:
   cmd.run:
     - name: docker compose -f /opt/wordpress/docker-compose.yml up -d
     - cwd: /opt/wordpress
     - require:
-      - file: wordpress_compose_file
-      - file: haproxy_compose_config
-      - file: haproxy_compose_cert
       - service: docker_service
+      - file: wordpress_compose_file
+      - file: haproxy_cfg
+      - file: haproxy_cert
+
+{% elif grains['os'] == 'Debian' %}
+
+required_packages_debian:
+  pkg.installed:
+    - pkgs:
+      - htop
+      - tcptraceroute
+      - iputils-ping
+      - dnsutils
+      - sysstat
+      - mtr
+
+nginx_pkg:
+  pkg.installed:
+    - name: nginx
+
+nginx_service:
+  service.running:
+    - name: nginx
+    - enable: True
+    - require:
+      - pkg: nginx_pkg
+
+php_packages:
+  pkg.installed:
+    - pkgs:
+      - php
+      - php-fpm
+      - php-mysql
+
+wordpress_tarball:
+  cmd.run:
+    - name: wget https://wordpress.org/latest.tar.gz -O /tmp/wordpress.tar.gz
+    - unless: test -f /tmp/wordpress.tar.gz
+
+extract_wordpress:
+  cmd.run:
+    - name: tar -xzf /tmp/wordpress.tar.gz -C /var/www/html --strip-components=1
+    - unless: test -f /var/www/html/index.php
+    - require:
+      - cmd: wordpress_tarball
+
+wp_config:
+  file.managed:
+    - name: /var/www/html/wp-config.php
+    - source: salt://files/wp-config.php.jinja
+    - template: jinja
+
+ssl_cert:
+  file.managed:
+    - name: /etc/ssl/certs/selfsigned.pem
+    - source: salt://files/ssl/selfsigned.pem
+
+nginx_conf:
+  file.managed:
+    - name: /etc/nginx/nginx.conf
+    - source: salt://files/nginx.conf
+    - require:
+      - pkg: nginx_pkg
+    - watch_in:
+      - service: nginx_service
+
+logrotate_nginx:
+  file.managed:
+    - name: /etc/logrotate.d/nginx
+    - source: salt://files/logrotate_nginx
+
+nginx_cron:
+  cron.present:
+    - name: "/bin/systemctl restart nginx"
+    - user: root
+    - daymonth: 1
+    - minute: 0
+    - hour: 0
+
+{% endif %}

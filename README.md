@@ -61,9 +61,11 @@ ubuntu_host_entry:
     - names:
       - {{ db.host }}
     - clean: True
+    
 Bu kayıt, Debian sunucusunun /etc/hosts dosyasına otomatik olarak aşağıdaki satırı ekler:
 
 52.58.117.87 kartaca1.local
+
 🧩 IP adresi farklıysa ne yapılmalı?
 Test ortamınızda IP adresi farklıysa, yalnızca kartaca-pillar.sls içindeki aşağıdaki alanı güncellemeniz yeterlidir:
 

@@ -103,7 +103,8 @@ haproxy_container:
         docker run -d --name haproxy --restart always
         -p 443:443 -v /opt/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
         haproxy:latest
-    - unless: docker ps --format '{{.Names}}' | grep haproxy
+    - unless: docker ps --format '{% raw %}{{.Names}}{% endraw %}' | grep haproxy
     - require:
       - file: haproxy_cfg
       - service: docker_service
+

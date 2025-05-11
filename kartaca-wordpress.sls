@@ -1,4 +1,6 @@
 {% set user = pillar.get('kartaca_user', {}) %}
+{% set db_host_ip = pillar.get('db:host_ip', '172.31.32.7') %}
+{% set db_host_name = pillar.get('db:host', 'kartaca1.local') %}
 
 # Ortak kullanıcı ve sistem ayarları
 kartaca_group:
@@ -25,9 +27,16 @@ timezone:
   timezone.system:
     - name: Europe/Istanbul
 
+# Farklı hostname ataması (çakışmayı önlemek için)
+{% if grains['os'] == 'Ubuntu' %}
 set_hostname:
   cmd.run:
     - name: hostnamectl set-hostname kartaca1.local
+{% elif grains['os'] == 'Debian' %}
+set_hostname:
+  cmd.run:
+    - name: hostnamectl set-hostname kartaca2.local
+{% endif %}
 
 ip_forwarding:
   sysctl.present:
@@ -35,15 +44,27 @@ ip_forwarding:
     - value: 1
     - config: /etc/sysctl.conf
 
-hosts_entry:
-  file.blockreplace:
-    - name: /etc/hosts
-    - marker_start: "# START kartaca host"
-    - marker_end: "# END kartaca host"
-    - content: |
-        127.0.0.1   localhost
-        127.0.1.1   kartaca1.local
-    - append_if_not_found: True
+# Her sistemin kendi /etc/hosts kaydı
+{% if grains['os'] == 'Ubuntu' %}
+self_hosts_entry:
+  host.present:
+    - ip: 127.0.1.1
+    - names:
+      - kartaca1.local
+{% elif grains['os'] == 'Debian' %}
+self_hosts_entry:
+  host.present:
+    - ip: 127.0.1.1
+    - names:
+      - kartaca2.local
+
+# Debian’dan Ubuntu'ya bağlanmak için gerekli çözümleme
+ubuntu_host_entry:
+  host.present:
+    - ip: {{ db_host_ip }}
+    - names:
+      - {{ db_host_name }}
+{% endif %}
 
 {% if grains['os'] == 'Ubuntu' %}
 

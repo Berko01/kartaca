@@ -46,26 +46,6 @@ Bu depo, Ubuntu 24.04 ve Debian 12 sistemlerine uygulanmak üzere hazırlanan Sa
 - `cert.pem` ile HTTPS kurulumu yapıldı  
 - Test: `curl -k https://localhost` başarılı şekilde WordPress sayfasını döndürdü  
 
-## 📁 Dizin Yapısı
-
-.
-├── files/
-│ ├── docker-compose.yml
-│ ├── haproxy.cfg
-│ ├── nginx.conf
-│ ├── sudoers_kartaca
-│ ├── wp-config.php.j2
-│ ├── logrotate_nginx
-│ └── ssl/
-│ ├── cert.pem
-│ └── key.pem
-├── kartaca-wordpress.sls
-├── kartaca-pillar.sls
-├── top.sls
-├── pillar/
-│ └── top.sls
-└── README.md
-
 
 ## ⚠️ Bağlantı Uyarısı
 

@@ -81,15 +81,6 @@ wordpress_compose_file:
     - source: salt://files/docker-compose.yml
     - makedirs: True
 
-# WordPress container'larını çalıştır
-wordpress_stack:
-  cmd.run:
-    - name: docker compose -f /opt/wordpress/docker-compose.yml up -d
-    - cwd: /opt/wordpress
-    - require:
-      - file: wordpress_compose_file
-      - service: docker_service
-
 #haproxy_compose_config:
   file.managed:
     - name: /opt/wordpress/haproxy.cfg
@@ -104,3 +95,12 @@ haproxy_compose_cert:
     - makedirs: True
     - require:
       - file: wordpress_compose_file
+      
+# WordPress container'larını çalıştır
+wordpress_stack:
+  cmd.run:
+    - name: docker compose -f /opt/wordpress/docker-compose.yml up -d
+    - cwd: /opt/wordpress
+    - require:
+      - file: wordpress_compose_file
+      - service: docker_service

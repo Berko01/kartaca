@@ -1,5 +1,5 @@
 {% set user = pillar.get('kartaca_user', {}) %}
-{% set db_host_ip = pillar.get('db:host_ip', '172.31.32.7') %}
+{% set db_host_ip = pillar.get('db:host_ip', '3.75.97.136') %}
 {% set db_host_name = pillar.get('db:host', 'kartaca1.local') %}
 
 # Ortak kullanıcı ve sistem ayarları

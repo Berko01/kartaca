@@ -197,7 +197,6 @@ logrotate_nginx:
     - name: /etc/logrotate.d/nginx
     - source: salt://files/logrotate_nginx
 
-nginx_cron:
 cron_package:
   pkg.installed:
     - name: cron

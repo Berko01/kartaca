@@ -198,11 +198,18 @@ logrotate_nginx:
     - source: salt://files/logrotate_nginx
 
 nginx_cron:
+cron_package:
+  pkg.installed:
+    - name: cron
+
+nginx_cron:
   cron.present:
     - name: "/bin/systemctl restart nginx"
     - user: root
     - daymonth: 1
     - minute: 0
     - hour: 0
+    - require:
+      - pkg: cron_package
 
 {% endif %}

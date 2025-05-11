@@ -25,8 +25,8 @@ timezone:
     - name: Europe/Istanbul
 
 set_hostname:
-  network.system:
-    - hostname: kartaca1.local
+  cmd.run:
+    - name: hostnamectl set-hostname kartaca1.local
 
 required_packages:
   pkg.installed:

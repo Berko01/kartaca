@@ -15,16 +15,14 @@ services:
 
   wordpress:
     image: wordpress
-    restart: always
     depends_on:
       - db
+    restart: always
     environment:
       WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_NAME: wordpress
       WORDPRESS_DB_USER: wpuser
       WORDPRESS_DB_PASSWORD: wppass
-    ports:
-      - "8080:80"
     deploy:
       replicas: 3
 

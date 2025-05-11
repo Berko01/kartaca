@@ -58,6 +58,7 @@ self_hosts_entry:
     - ip: 127.0.1.1
     - names:
       - kartaca2.local
+{% endif %}   <------ BURASI EKLENMELİ
 
 # Debian’dan Ubuntu'ya bağlanmak için gerekli çözümleme
 ubuntu_host_entry:
@@ -66,6 +67,7 @@ ubuntu_host_entry:
     - names:
       - {{ db.host }}
     - clean: True
+
 
 {% if grains['os'] == 'Ubuntu' %}
 

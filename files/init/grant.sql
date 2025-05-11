@@ -1,0 +1,2 @@
+GRANT ALL PRIVILEGES ON wordpress.* TO 'wpuser'@'%' IDENTIFIED BY 'wppass';
+FLUSH PRIVILEGES;

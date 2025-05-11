@@ -90,21 +90,31 @@ wordpress_stack:
       - file: wordpress_compose_file
       - service: docker_service
 
-# HAProxy kurulumu
+# HAProxy konfigürasyon dosyası
 haproxy_cfg:
   file.managed:
     - name: /opt/haproxy/haproxy.cfg
     - source: salt://files/haproxy.cfg
     - makedirs: True
 
+# SSL sertifikası dosyası
+haproxy_cert:
+  file.managed:
+    - name: /opt/haproxy/ssl/selfsigned.pem
+    - source: salt://files/ssl/selfsigned.pem
+    - makedirs: True
+
+# HAProxy container'ı
 haproxy_container:
   cmd.run:
     - name: >
         docker run -d --name haproxy --restart always
-        -p 443:443 -v /opt/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+        -p 443:443
+        -v /opt/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+        -v /opt/haproxy/ssl/selfsigned.pem:/usr/local/etc/haproxy/ssl/selfsigned.pem:ro
         haproxy:latest
     - unless: docker ps --format '{% raw %}{{.Names}}{% endraw %}' | grep haproxy
     - require:
       - file: haproxy_cfg
+      - file: haproxy_cert
       - service: docker_service
-

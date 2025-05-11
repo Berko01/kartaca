@@ -1,3 +1,8 @@
+❗ Not: wp-config.php içinde kullanılan DB_HOST değeri 'kartaca1.local' olarak tanımlanmıştır.
+Debian sunucusunun /etc/hosts dosyasına Ubuntu sunucusunun IP'si bu hostname ile eklenmektedir.
+
+Salt-master testlerinde Ubuntu makinesi 'kartaca1.local' olarak çözümlendiği sürece bağlantı sorunsuz çalışacaktır.
+
 # Kartaca - Çekirdekten Yetişenler Görevi
 
 Bu depo, Ubuntu 24.04 ve Debian 12 sistemlerine uygulanmak üzere hazırlanan SaltStack state ve pillar dosyalarını içermektedir. Tüm işlemler **tek bir Salt state (`kartaca-wordpress.sls`)** ve **tek bir pillar (`kartaca-pillar.sls`)** dosyası içinde organize edilmiştir.

@@ -15,9 +15,9 @@ services:
 
   wordpress:
     image: wordpress
+    restart: always
     depends_on:
       - db
-    restart: always
     environment:
       WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_NAME: wordpress
@@ -25,6 +25,18 @@ services:
       WORDPRESS_DB_PASSWORD: wppass
     deploy:
       replicas: 3
+
+  haproxy:
+    image: haproxy:latest
+    container_name: haproxy
+    restart: always
+    ports:
+      - "443:443"
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./ssl/selfsigned.pem:/usr/local/etc/haproxy/ssl/selfsigned.pem:ro
+    depends_on:
+      - wordpress
 
 volumes:
   db_data:

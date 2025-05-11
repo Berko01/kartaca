@@ -201,14 +201,22 @@ cron_package:
   pkg.installed:
     - name: cron
 
+enable_cron_service:
+  service.running:
+    - name: cron
+    - enable: True
+    - require:
+      - pkg: cron_package
+
 nginx_cron:
   cron.present:
     - name: "/bin/systemctl restart nginx"
     - user: root
-    - daymonth: 1
     - minute: 0
     - hour: 0
+    - daymonth: 1
     - require:
-      - pkg: cron_package
+      - service: enable_cron_service
+
 
 {% endif %}

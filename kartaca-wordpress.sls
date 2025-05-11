@@ -148,6 +148,7 @@ nginx_service:
     - enable: True
     - require:
       - pkg: nginx_pkg
+      - file: nginx_conf
 
 php_packages:
   pkg.installed:
@@ -173,6 +174,8 @@ wp_config:
     - name: /var/www/html/wp-config.php
     - source: salt://files/wp-config.php.jinja
     - template: jinja
+    - require:
+      - cmd: extract_wordpress
 
 ssl_cert:
   file.managed:
@@ -185,6 +188,7 @@ nginx_conf:
     - source: salt://files/nginx.conf
     - require:
       - pkg: nginx_pkg
+      - file: wp_config
     - watch_in:
       - service: nginx_service
 

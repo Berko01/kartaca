@@ -2,6 +2,15 @@
 {% set db_host_ip = pillar.get('db:host_ip', '3.75.97.136') %}
 {% set db_host_name = pillar.get('db:host', 'kartaca1.local') %}
 
+
+common_packages:
+  pkg.installed:
+    - pkgs:
+      - curl
+      - gnupg
+      - ca-certificates
+      - apt-transport-https
+
 # Ortak kullanıcı ve sistem ayarları
 kartaca_group:
   group.present:

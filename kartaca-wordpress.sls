@@ -64,6 +64,7 @@ ubuntu_host_entry:
     - ip: {{ db_host_ip }}
     - names:
       - {{ db_host_name }}
+    - clean: True
 {% endif %}
 
 {% if grains['os'] == 'Ubuntu' %}

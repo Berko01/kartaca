@@ -89,3 +89,18 @@ wordpress_stack:
     - require:
       - file: wordpress_compose_file
       - service: docker_service
+
+#haproxy_compose_config:
+  file.managed:
+    - name: /opt/wordpress/haproxy.cfg
+    - source: salt://files/haproxy.cfg
+    - require:
+      - file: wordpress_compose_file
+
+haproxy_compose_cert:
+  file.managed:
+    - name: /opt/wordpress/ssl/selfsigned.pem
+    - source: salt://files/ssl/selfsigned.pem
+    - makedirs: True
+    - require:
+      - file: wordpress_compose_file

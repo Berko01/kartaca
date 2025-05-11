@@ -37,6 +37,7 @@ services:
       - ./ssl/selfsigned.pem:/usr/local/etc/haproxy/ssl/selfsigned.pem:ro
     depends_on:
       - wordpress
+  
 
 volumes:
   db_data:

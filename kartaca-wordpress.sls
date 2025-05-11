@@ -195,7 +195,7 @@ nginx_conf:
 logrotate_nginx:
   file.managed:
     - name: /etc/logrotate.d/nginx
-    - source: salt://files/logrotate_nginx
+    - source: salt://files/logrotate.d/nginx
 
 cron_package:
   pkg.installed:

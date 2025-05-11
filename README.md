@@ -1,62 +1,53 @@
-# Kartaca - Çekirdekten Yetişenler Görevi
+📦 Kartaca - Çekirdekten Yetişenler Görevi
 
-Bu depo, Ubuntu 24.04 ve Debian 12 sistemlerine uygulanmak üzere hazırlanan SaltStack state ve pillar dosyalarını içermektedir. Tüm işlemler **tek bir Salt state (`kartaca-wordpress.sls`)** ve **tek bir pillar (`kartaca-pillar.sls`)** dosyası içinde organize edilmiştir.
+Bu depo, Ubuntu 24.04 ve Debian 12 sistemlerine uygulanmak üzere hazırlanmış tam otomatik bir SaltStack altyapısı içerir. Tüm yapılandırmalar tek bir Salt state dosyası (kartaca-wordpress.sls) ve bir pillar dosyası (kartaca-pillar.sls) aracılığıyla yönetilir.
 
----
+📁 İçerik
 
-## 📌 İçerik
+kartaca-wordpress.sls: Ana Salt state dosyası (OS tipi bazlı tüm işlemleri içerir)
+kartaca-pillar.sls: Kullanıcı bilgileri ve sistem yapılandırmalarını içeren pillar verisi
+top.sls: State dosyası eşlemesini tanımlar
+pillar/top.sls: Pillar eşlemesini tanımlar
+files/: Yardımcı dosyalar dizini:
+docker-compose.yml: 3 WordPress replikası + MariaDB + HAProxy (Ubuntu için)
+haproxy.cfg: HAProxy konfigürasyonu (443 portu, round-robin)
+nginx.conf: Nginx yapılandırma dosyası (Debian için)
+sudoers_kartaca: kartaca kullanıcısına şifresiz apt izni
+wp-config.php.j2: WordPress yapılandırması için Jinja şablonu
+logrotate_nginx: Saatlik log döngüsü yapılandırması
+ssl/cert.pem ve ssl/key.pem: Self-signed SSL sertifikası ve özel anahtarı (Debian için)
+🧪 Test Edilen Platformlar
 
-- **kartaca-wordpress.sls**: Salt state dosyası
-- **kartaca-pillar.sls**: Kullanıcı ve sistem parametrelerini içeren pillar dosyası
-- **top.sls**: Salt state mapping dosyası
-- **pillar/top.sls**: Pillar mapping dosyası
-- **files/**:
-  - `docker-compose.yml`: 3 WordPress replica + HAProxy + MariaDB servisi (Ubuntu için)
-  - `haproxy.cfg`: 443 üzerinden round-robin yönlendirme (Ubuntu için)
-  - `ssl/cert.pem` & `ssl/key.pem`: Self-signed SSL sertifikası ve özel anahtarı (Debian için)
-  - `sudoers_kartaca`: `kartaca` kullanıcısına şifresiz `sudo apt` yetkisi
-  - `nginx.conf`: Debian için Nginx yapılandırma dosyası
-  - `wp-config.php.j2`: WordPress yapılandırması için Jinja şablonu
-  - `logrotate_nginx`: Saatlik log döngüsü için yapılandırma
+✅ Ubuntu 24.04 (Docker Tabanlı WordPress Kurulumu)
+kartaca kullanıcısı oluşturuldu (UID/GID: 2025)
+Şifresiz sudo apt izni tanımlandı
+Hostname & timezone (Europe/Istanbul) ayarlandı
+Sistem paketleri kuruldu (htop, mtr, dnsutils vb.)
+IP forwarding etkinleştirildi
+/etc/hosts yapılandırıldı
+Docker üzerinden:
+3 adet WordPress container'ı
+1 adet MariaDB container
+HAProxy üzerinden SSL destekli reverse proxy
+Test: curl -k https://localhost komutu başarıyla WordPress sayfasını döndürdü
+✅ Debian 12 (Nginx + PHP-FPM Tabanlı WordPress Kurulumu)
+kartaca kullanıcısı oluşturuldu (UID/GID: 2025)
+Şifresiz sudo apt yetkisi verildi
+Hostname & timezone ayarlandı
+Gerekli yardımcı paketler kuruldu
+Nginx + PHP-FPM yapılandırıldı
+wp-config.php Salt üzerinden secrets ile oluşturuldu
+SSL sertifikası /etc/ssl/certs/selfsigned.pem yoluna yerleştirildi
+Logrotate & cron ile günlük döngü yapılandırıldı
+Test: curl -k https://localhost komutu WordPress arayüzünü başarıyla döndürdü
+📂 Dizin Yapısı
 
----
-
-## 🧪 Test Edilen Özellikler
-
-### ✅ Ubuntu 24.04 (Docker Tabanlı Kurulum)
-
-- `kartaca` adlı kullanıcı oluşturuldu (UID/GID: 2025)
-- Kullanıcıya sudo ve şifresiz `apt` yetkisi verildi
-- Zaman dilimi ve hostname ayarlandı
-- Gerekli sistem paketleri kuruldu
-- IP forwarding etkinleştirildi
-- `/etc/hosts` güncellendi
-- Docker ortamında:
-  - 3 WordPress replica
-  - MariaDB
-  - HTTPS erişimli HAProxy (443 portu)
-- Tüm yapı `salt state` ile tam otomatik kuruldu
-- Test: `curl -k https://localhost` ile başarıyla erişildi
-
-### ✅ Debian 12 (Native Kurulum - Nginx & PHP-FPM)
-
-- `kartaca` adlı kullanıcı oluşturuldu (UID/GID: 2025)
-- Kullanıcıya sudo ve şifresiz `apt` yetkisi tanımlandı
-- Hostname ve timezone (`Europe/Istanbul`) ayarlandı
-- Yardımcı sistem paketleri kuruldu (`htop`, `ping`, `mtr` vs.)
-- **Nginx + PHP-FPM** yapılandırıldı
-- MariaDB kurulumu tamamlandı ve `wordpress` veritabanı oluşturuldu
-- `wp-config.php` dosyası, salt üzerinden secrets ile birlikte yerleştirildi
-- Günlük döngüsü için `logrotate` ve `cron` yapılandırıldı
-- `cert.pem` ile HTTPS kurulumu yapıldı
-- Test: `curl -k https://localhost` başarılı şekilde WordPress sayfasını döndürdü
-
----
-
-## 📁 Dizin Yapısı
-
-```bash
-.
+kartaca-sistem-administrator-task/
+├── kartaca-wordpress.sls
+├── kartaca-pillar.sls
+├── top.sls
+├── pillar/
+│   └── top.sls
 ├── files/
 │   ├── docker-compose.yml
 │   ├── haproxy.cfg
@@ -67,9 +58,4 @@ Bu depo, Ubuntu 24.04 ve Debian 12 sistemlerine uygulanmak üzere hazırlanan Sa
 │   └── ssl/
 │       ├── cert.pem
 │       └── key.pem
-├── kartaca-wordpress.sls
-├── kartaca-pillar.sls
-├── top.sls
-├── pillar/
-│   └── top.sls
 └── README.md

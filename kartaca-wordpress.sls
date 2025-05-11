@@ -81,13 +81,15 @@ wordpress_compose_file:
     - source: salt://files/docker-compose.yml
     - makedirs: True
 
-#haproxy_compose_config:
+# HAProxy konfigürasyon dosyası
+haproxy_compose_config:
   file.managed:
     - name: /opt/wordpress/haproxy.cfg
     - source: salt://files/haproxy.cfg
     - require:
       - file: wordpress_compose_file
 
+# SSL sertifikası
 haproxy_compose_cert:
   file.managed:
     - name: /opt/wordpress/ssl/selfsigned.pem
@@ -95,12 +97,14 @@ haproxy_compose_cert:
     - makedirs: True
     - require:
       - file: wordpress_compose_file
-      
-# WordPress container'larını çalıştır
+
+# WordPress + HAProxy container'larını çalıştır
 wordpress_stack:
   cmd.run:
     - name: docker compose -f /opt/wordpress/docker-compose.yml up -d
     - cwd: /opt/wordpress
     - require:
       - file: wordpress_compose_file
+      - file: haproxy_compose_config
+      - file: haproxy_compose_cert
       - service: docker_service

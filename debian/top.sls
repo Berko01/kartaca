@@ -1,3 +1,0 @@
-base:
-  '*':
-    - kartaca-debian

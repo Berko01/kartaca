@@ -1,23 +1,21 @@
 <?php
 define( 'DB_NAME', 'wordpress' );
 define( 'DB_USER', 'wpuser' );
-define( 'DB_PASSWORD', 'wp123456' );
-define( 'DB_HOST', 'ubuntu_mysql_ip' );
+define( 'DB_PASSWORD', 'wppass' );
+define( 'DB_HOST', 'wordpress-db:3306' );
+
 define( 'DB_CHARSET', 'utf8' );
 define( 'DB_COLLATE', '' );
 
-/**#@+
- * Authentication Unique Keys and Salts.
- */
-{{ salt['http.query']('https://api.wordpress.org/secret-key/1.1/salt/')["body"] }}
-
-/**#@-*/
+// Güvenlik anahtarları
+{% set keys = salt['cmd.run']('curl -s https://api.wordpress.org/secret-key/1.1/salt/') %}
+{{ keys }}
 
 $table_prefix = 'wp_';
 
 define( 'WP_DEBUG', false );
 
 if ( ! defined( 'ABSPATH' ) ) {
-    define( 'ABSPATH', __DIR__ . '/' );
+	define( 'ABSPATH', __DIR__ . '/' );
 }
 require_once ABSPATH . 'wp-settings.php';

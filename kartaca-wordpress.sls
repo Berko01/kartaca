@@ -1,6 +1,9 @@
 {% set user = pillar.get('kartaca_user', {}) %}
-
 {% set db = pillar.get('db', {}) %}
+{% set hostname = 'kartaca1.local' if grains['os'] == 'Ubuntu' else 'kartaca2.local' %}
+{% set self_host = hostname %}
+{% set ping_package = 'inetutils-ping' if grains['os'] == 'Ubuntu' else 'iputils-ping' %}
+{% set base_packages = ['htop', 'tcptraceroute', ping_package, 'dnsutils', 'sysstat', 'mtr'] %}
 
 # Ortak kullanıcı ve sistem ayarları
 kartaca_group:
@@ -27,17 +30,16 @@ timezone:
   timezone.system:
     - name: Europe/Istanbul
 
-{% if grains['os'] == 'Ubuntu' %}
 set_hostname:
   cmd.run:
-    - name: hostnamectl set-hostname kartaca1.local
-    - unless: "hostnamectl | grep 'Static hostname: kartaca1.local'"
-{% elif grains['os'] == 'Debian' %}
-set_hostname:
-  cmd.run:
-    - name: hostnamectl set-hostname kartaca2.local
-    - unless: "hostnamectl | grep 'Static hostname: kartaca2.local'"
-{% endif %}
+    - name: hostnamectl set-hostname {{ hostname }}
+    - unless: "hostnamectl | grep 'Static hostname: {{ hostname }}'"
+
+self_hosts_entry:
+  host.present:
+    - ip: 127.0.1.1
+    - names:
+      - {{ self_host }}
 
 ip_forwarding:
   sysctl.present:
@@ -45,21 +47,6 @@ ip_forwarding:
     - value: 1
     - config: /etc/sysctl.conf
 
-{% if grains['os'] == 'Ubuntu' %}
-self_hosts_entry:
-  host.present:
-    - ip: 127.0.1.1
-    - names:
-      - kartaca1.local
-{% elif grains['os'] == 'Debian' %}
-self_hosts_entry:
-  host.present:
-    - ip: 127.0.1.1
-    - names:
-      - kartaca2.local
-{% endif %}
-
-# Debian’dan Ubuntu'ya bağlanmak için gerekli çözümleme
 ubuntu_host_entry:
   host.present:
     - ip: {{ db.host_ip }}
@@ -67,18 +54,11 @@ ubuntu_host_entry:
       - {{ db.host }}
     - clean: True
 
+required_packages:
+  pkg.installed:
+    - pkgs: {{ base_packages }}
 
 {% if grains['os'] == 'Ubuntu' %}
-
-required_packages_ubuntu:
-  pkg.installed:
-    - pkgs:
-      - htop
-      - tcptraceroute
-      - inetutils-ping
-      - dnsutils
-      - sysstat
-      - mtr
 
 docker_pkg_repo:
   pkgrepo.managed:
@@ -130,27 +110,9 @@ wordpress_stack:
 
 {% elif grains['os'] == 'Debian' %}
 
-required_packages_debian:
-  pkg.installed:
-    - pkgs:
-      - htop
-      - tcptraceroute
-      - iputils-ping
-      - dnsutils
-      - sysstat
-      - mtr
-
 nginx_pkg:
   pkg.installed:
     - name: nginx
-
-nginx_service:
-  service.running:
-    - name: nginx
-    - enable: True
-    - require:
-      - pkg: nginx_pkg
-      - file: nginx_conf
 
 php_packages:
   pkg.installed:
@@ -194,6 +156,14 @@ nginx_conf:
     - watch_in:
       - service: nginx_service
 
+nginx_service:
+  service.running:
+    - name: nginx
+    - enable: True
+    - require:
+      - pkg: nginx_pkg
+      - file: nginx_conf
+
 logrotate_nginx:
   file.managed:
     - name: /etc/logrotate.d/nginx
@@ -219,6 +189,5 @@ nginx_cron:
     - daymonth: 1
     - require:
       - service: enable_cron_service
-
 
 {% endif %}

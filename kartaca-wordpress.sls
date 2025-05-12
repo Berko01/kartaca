@@ -40,6 +40,7 @@ self_hosts_entry:
     - ip: 127.0.1.1
     - names:
       - {{ self_host }}
+    - clean: True
 
 ip_forwarding:
   sysctl.present:
